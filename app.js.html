@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preoperative Cardiac Imaging Risk Stratification</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .badge-appropriate { background-color: #22c55e; color: white; }
+        .badge-may-be { background-color: #eab308; color: white; }
+        .badge-rarely { background-color: #ef4444; color: white; }
+        .badge-na { background-color: #d1d5db; color: #4b5563; }
+    </style>
+</head>
+<body class="bg-gray-50 p-6 font-sans">
+    <div class="max-w-6xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="bg-blue-900 text-white p-6 flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold">AUC Multimodality Imaging Preoperative Calculator</h1>
+                <p class="text-sm mt-2 opacity-80">Risk stratification for patients undergoing nonemergent, noncardiac surgery</p>
+            </div>
+            <button onclick="toggleReference()" class="bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded text-sm font-semibold transition">
+                View Clinical Reference Tables
+            </button>
+        </div>
+
+        <!-- Reference Tables (Hidden by default) -->
+        <div id="referenceTables" class="hidden bg-gray-100 p-6 border-b border-gray-300">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Clinical Definitions & Criteria</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white p-4 rounded shadow-sm border border-gray-200">
+                    <h3 class="font-bold text-blue-900 border-b pb-2 mb-2">Definition of Moderate or Greater Ischemia</h3>
+                    <ul class="text-sm text-gray-700 space-y-2 list-disc pl-4">
+                        <li><strong>Nuclear (SPECT/PET):</strong> &ge;10% myocardium ischemic</li>
+                        <li><strong>Echo:</strong> &ge;3/16 segments with stress-induced severe hypokinesis/akinesis or WMSI >1.1</li>
+                        <li><strong>CMR:</strong> &ge;12% myocardium ischemic and/or wall motion abnormalities matching Echo criteria</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-4 rounded shadow-sm border border-gray-200">
+                    <h3 class="font-bold text-blue-900 border-b pb-2 mb-2">HF Severity Classification</h3>
+                    <ul class="text-sm text-gray-700 space-y-2 list-disc pl-4">
+                        <li><strong>Low/Moderate HFrEF:</strong> NYHA I-III, EF >25%, GFR >40, Euvolemia</li>
+                        <li><strong>High HFrEF:</strong> NYHA IIIb-IV, EF &lt;25%, GFR &lt;30, Fluid overload</li>
+                        <li><strong>Low/Moderate HFpEF:</strong> NYHA I-III, EF >40%, BP controlled</li>
+                        <li><strong>High HFpEF:</strong> EF >40%, poorly controlled BP, RVSP >50mmHg, fluid overload</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-4 rounded shadow-sm border border-gray-200">
+                    <h3 class="font-bold text-blue-900 border-b pb-2 mb-2">Stages of VHD</h3>
+                    <ul class="text-sm text-gray-700 space-y-1 list-disc pl-4">
+                        <li><strong>Stage A:</strong> At risk (no structural disease/symptoms)</li>
+                        <li><strong>Stage B:</strong> Progressive (mild-moderate, asymptomatic)</li>
+                        <li><strong>Stage C:</strong> Asymptomatic severe (compensated)</li>
+                        <li><strong>Stage D:</strong> Symptomatic severe</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Input Form -->
+            <div class="col-span-1 space-y-6">
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">1. Known or Suspected Heart Disease?</label>
+                    <select id="heartDisease" class="w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
+                        <option value="none">No</option>
+                        <option value="ischemic">Yes: Ischemic Heart Disease</option>
+                        <option value="vhd_hf">Yes: VHD or HF</option>
+                    </select>
+                </div>
+
+                <div id="priorTestingContainer">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">2. Prior Testing Within 90-220 Days?</label>
+                    <select id="priorTesting" class="w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
+                        <!-- Populated dynamically via JS based on Heart Disease selection -->
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">3. Symptoms</label>
+                    <div class="flex gap-4">
+                        <label class="flex items-center gap-2">
+                            <input type="radio" name="symptoms" value="no" checked class="w-4 h-4 text-blue-600 focus:ring-blue-500">
+                            No New/Worsening
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="radio" name="symptoms" value="yes" class="w-4 h-4 text-blue-600 focus:ring-blue-500">
+                            New/Worsening
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">4. Functional Status</label>
+                    <div class="flex gap-4">
+                        <label class="flex items-center gap-2">
+                            <input type="radio" name="mets" value="ge4" checked class="w-4 h-4 text-blue-600 focus:ring-blue-500">
+                            &ge; 4 METs
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="radio" name="mets" value="lt4" class="w-4 h-4 text-blue-600 focus:ring-blue-500">
+                            &lt; 4 METs
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">5. Surgical Risk Category</label>
+                    <select id="surgicalRisk" class="w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
+                        <option value="0">Low-Risk Nonvascular</option>
+                        <option value="1">Intermediate-Risk Nonvascular</option>
+                        <option value="2">High-Risk Nonvascular</option>
+                        <option value="3">Low-Risk Vascular</option>
+                        <option value="4">Intermediate-Risk Vascular</option>
+                        <option value="5">High-Risk Vascular</option>
+                        <option value="6">Solid Organ Transplant</option>
+                    </select>
+                </div>
+
+                <button onclick="calculateRisk()" class="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-700 transition shadow-sm">
+                    Calculate Imaging Appropriateness
+                </button>
+            </div>
+
+            <!-- Results Output -->
+            <div class="col-span-1 md:col-span-2">
+                <div class="bg-gray-100 p-5 rounded-md border border-gray-200 min-h-[400px]">
+                    <h2 class="text-lg font-bold text-gray-800 mb-4 border-b border-gray-300 pb-2">Testing Modality Recommendations</h2>
+                    
+                    <div id="resultsTable" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <p class="text-gray-500 italic col-span-2">Select patient criteria and click calculate to view evidence-based imaging recommendations.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Data First, then Logic -->
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

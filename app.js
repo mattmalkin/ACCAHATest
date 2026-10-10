@@ -1,6 +1,4 @@
-// app.js
-
-// Make functions globally available so the HTML onclick attributes can see them
+// Make functions globally available for the HTML onclick attributes
 window.toggleReference = function() {
     const ref = document.getElementById('referenceTables');
     if (ref) ref.classList.toggle('hidden');
@@ -12,15 +10,13 @@ window.calculateRisk = function() {
     let rawSymptoms = document.querySelector('input[name="symptoms"]:checked').value;
     let rawMets = document.querySelector('input[name="mets"]:checked').value;
     
-    // Note: Ensure your index.html Surgical Risk <option> values are "0", "1", "2", etc., not the old text strings.
+    // Parses the 0-6 values from your updated HTML
     let surgRiskIndex = parseInt(document.getElementById('surgicalRisk').value);
 
-    // Per the algorithm headers: presence of symptoms OR <4 METs triggers the symptomatic logic
+    // Presence of symptoms OR <4 METs triggers the symptomatic logic
     let combinedCondition = (rawSymptoms === "yes" || rawMets === "lt4") ? "lt4" : "ge4";
     
-    // Build the data lookup key
     let key = `${hd}_${test}_${combinedCondition}`;
-    
     const resultsContainer = document.getElementById('resultsTable');
     resultsContainer.innerHTML = '';
 
@@ -43,8 +39,8 @@ window.calculateRisk = function() {
     } else {
         resultsContainer.innerHTML = `
             <div class="col-span-2 bg-red-50 border-l-4 border-red-500 p-4">
-                <p class="text-sm text-red-700 font-semibold">Missing Clinical Pathway</p>
-                <p class="text-sm text-red-700 mt-1">Unable to resolve the requested mapping for this specific combination of criteria. Please verify inputs.</p>
+                <p class="text-sm text-red-700 font-bold">Missing Clinical Pathway</p>
+                <p class="text-sm text-red-700 mt-1">Unable to resolve the mapping for these criteria. Please verify inputs.</p>
             </div>`;
     }
 };
@@ -63,7 +59,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const testSelect = document.getElementById('priorTesting');
 
     if (hdSelect && testSelect) {
-        // Dynamically populate the "Prior Testing" dropdown based on the "Heart Disease" selection
         hdSelect.addEventListener('change', (e) => {
             const val = e.target.value;
             testSelect.innerHTML = ''; 
